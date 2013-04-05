@@ -6,7 +6,7 @@
 #include "com_avos_minute_util_VideoEngine.h"
 
 static JavaVM *sVm;
-int process(int argc, char** argv);
+extern int process(int argc, char** argv);
 
 JNIEXPORT jint JNICALL JNI_Onload(JavaVM *jvm, void* reserved)
 {
@@ -33,7 +33,7 @@ JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_crop
     if (NULL == argv) {
         (*env)->ReleaseStringUTFChars(env, inputFile, input);
         (*env)->ReleaseStringUTFChars(env, outputFile, output);
-        return result;
+        return (jint)result;
     }
     // ffmpeg -i inputfile -vf "crop=w:h" -acodec copy outputfile
     for (i = 0; i < argc; i++) {
@@ -70,9 +70,11 @@ JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_crop
                 break;
         };
     }
+    (*env)->ReleaseStringUTFChars(env, inputFile, input);
+    (*env)->ReleaseStringUTFChars(env, outputFile, output);
+ 
     if (i == argc) {
         result = process(argc, argv);
-        LOGD("process return: %d", result);
     }
     for (i = 0; i < argc; i++) {
         if (NULL != argv[i]) {
@@ -82,9 +84,6 @@ JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_crop
     };
     free(argv);
     argv = NULL;
-    (*env)->ReleaseStringUTFChars(env, inputFile, input);
-    (*env)->ReleaseStringUTFChars(env, outputFile, output);
- 
-    return result;
+    return (jint)result;
 }
 
