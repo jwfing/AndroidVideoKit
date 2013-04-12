@@ -55,7 +55,8 @@ JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_crop
                 snprintf(argv[i], 256, "%s", "-vf");
                 break;
             case 4:
-                snprintf(argv[i], 256, "crop=%d:%d,transpose=1", width, height);
+                //snprintf(argv[i], 256, "crop=%d:%d,transpose=1", 480,480);
+                snprintf(argv[i], 256, "crop=%d:%d,scale=480:480,transpose=1", width, height);
                 break;
            case 5:
                 snprintf(argv[i], 256, "%s", "-acodec");
