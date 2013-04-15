@@ -28,7 +28,7 @@ JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_crop
     LOGD("crop() called. in=%s, out=%s, w=%d h=%d", input, output, width, height);
     int i = 0;
     int result = -1;
-    int argc = 8;
+    int argc = 10;
     char** argv = (char**)malloc(sizeof(char*) * argc);
     if (NULL == argv) {
         (*env)->ReleaseStringUTFChars(env, inputFile, input);
@@ -65,6 +65,12 @@ JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_crop
                 snprintf(argv[i], 256, "%s", "copy");
                 break;
            case 7:
+                snprintf(argv[i], 256, "%s", "-vcodec");
+                break;
+           case 8:
+                snprintf(argv[i], 256, "%s", "libx264");
+                break;
+           case 9:
                 snprintf(argv[i], 256, "%s", output);
                 break;
            default:
