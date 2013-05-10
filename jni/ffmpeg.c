@@ -167,7 +167,7 @@ static int input_sync;
 static float dts_delta_threshold = 10;
 static float dts_error_threshold = 3600*30;
 
-static int print_stats = 1;
+static int print_stats = 0;
 static int debug_ts = 0;
 static int current_time;
 
@@ -488,7 +488,7 @@ void init_local_vars()
     dts_delta_threshold = 10;
     dts_error_threshold = 3600*30;
 
-    print_stats = 1;
+    print_stats = 0;
     debug_ts = 0;
     current_time = 0;
     input_streams = NULL;
@@ -3481,10 +3481,6 @@ static int transcode(void)
     if (ret < 0)
         goto fail;
 
-    if (!using_stdin) {
-        LOGI("Press [q] to stop, [?] for help\n");
-    }
-
     timer_start = av_gettime();
 
     for (; received_sigterm == 0;) {
@@ -3494,97 +3490,6 @@ static int transcode(void)
         int64_t cur_time= av_gettime();
 
         ipts_min = INT64_MAX;
-        /* if 'q' pressed, exits */
-        if (!using_stdin) {
-            static int64_t last_time;
-            if (received_nb_signals)
-                break;
-            /* read_key() returns 0 on EOF */
-            if(cur_time - last_time >= 100000 && !run_as_daemon){
-                key =  read_key();
-                last_time = cur_time;
-            }else
-                key = -1;
-            if (key == 'q')
-                break;
-            if (key == '+') av_log_set_level(av_log_get_level()+10);
-            if (key == '-') av_log_set_level(av_log_get_level()-10);
-            if (key == 's') qp_hist     ^= 1;
-            if (key == 'h'){
-                if (do_hex_dump){
-                    do_hex_dump = do_pkt_dump = 0;
-                } else if(do_pkt_dump){
-                    do_hex_dump = 1;
-                } else
-                    do_pkt_dump = 1;
-                av_log_set_level(AV_LOG_DEBUG);
-            }
-            if (key == 'c' || key == 'C'){
-                char buf[4096], target[64], command[256], arg[256] = {0};
-                double time;
-                int k, n = 0;
-                fprintf(stderr, "\nEnter command: <target> <time> <command>[ <argument>]\n");
-                i = 0;
-                while ((k = read_key()) != '\n' && k != '\r' && i < sizeof(buf)-1)
-                    if (k > 0)
-                        buf[i++] = k;
-                buf[i] = 0;
-                if (k > 0 &&
-                    (n = sscanf(buf, "%63[^ ] %lf %255[^ ] %255[^\n]", target, &time, command, arg)) >= 3) {
-                    LOGD("Processing command target:%s time:%f command:%s arg:%s",
-                           target, time, command, arg);
-                    for (i = 0; i < nb_filtergraphs; i++) {
-                        FilterGraph *fg = filtergraphs[i];
-                        if (fg->graph) {
-                            if (time < 0) {
-                                ret = avfilter_graph_send_command(fg->graph, target, command, arg, buf, sizeof(buf),
-                                                                  key == 'c' ? AVFILTER_CMD_FLAG_ONE : 0);
-                                fprintf(stderr, "Command reply for stream %d: ret:%d res:%s\n", i, ret, buf);
-                            } else {
-                                ret = avfilter_graph_queue_command(fg->graph, target, command, arg, 0, time);
-                            }
-                        }
-                    }
-                } else {
-                    LOGE(
-                           "Parse error, at least 3 arguments were expected, "
-                           "only %d given in string '%s'\n", n, buf);
-                }
-            }
-            if (key == 'd' || key == 'D'){
-                int debug=0;
-                if(key == 'D') {
-                    debug = input_streams[0]->st->codec->debug<<1;
-                    if(!debug) debug = 1;
-                    while(debug & (FF_DEBUG_DCT_COEFF|FF_DEBUG_VIS_QP|FF_DEBUG_VIS_MB_TYPE)) //unsupported, would just crash
-                        debug += debug;
-                }else
-                    if(scanf("%d", &debug)!=1)
-                        fprintf(stderr,"error parsing debug value\n");
-                for(i=0;i<nb_input_streams;i++) {
-                    input_streams[i]->st->codec->debug = debug;
-                }
-                for(i=0;i<nb_output_streams;i++) {
-                    ost = output_streams[i];
-                    ost->st->codec->debug = debug;
-                }
-                if(debug) av_log_set_level(AV_LOG_DEBUG);
-                fprintf(stderr,"debug=%d\n", debug);
-            }
-            if (key == '?'){
-                fprintf(stderr, "key    function\n"
-                                "?      show this help\n"
-                                "+      increase verbosity\n"
-                                "-      decrease verbosity\n"
-                                "c      Send command to filtergraph\n"
-                                "D      cycle through available debug modes\n"
-                                "h      dump packets/hex press to cycle through the 3 states\n"
-                                "q      quit\n"
-                                "s      Show QP histogram\n"
-                );
-            }
-        }
-
         /* check if there's any stream where output is still needed */
         for (i = 0; i < nb_output_streams; i++) {
             OutputFile *of;
