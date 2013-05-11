@@ -11,6 +11,60 @@
         android:layout_gravity="center" >
     </FrameLayout>
 
+    <FrameLayout
+        android:id="@+id/video_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:background="#333"
+        android:visibility="gone" >
+            <VideoView android:id="@+id/video_play_view"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:layout_gravity="center">
+            </VideoView>
+        <LinearLayout
+            android:id="@+id/video_portrait_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="top"
+            android:background="@android:color/transparent"
+            android:orientation="vertical">
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginTop="0dp"
+        android:background="#333"
+        android:padding="10dp"
+        android:progress="100"
+        android:progressDrawable="@drawable/greenprogress" />
+            
+            <FrameLayout
+                android:id="@+id/video_preview_overlay"
+                android:layout_width="match_parent"
+                android:layout_height="12dp">
+            </FrameLayout>
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_gravity="bottom"
+                android:background="#17151A" />
+
+            <Button
+                android:id="@+id/video_share_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="#333"
+                android:text="Crop" />
+        </LinearLayout>
+    </FrameLayout>
+    
     <LinearLayout
         android:id="@+id/camera_portrait_overlay"
         android:layout_width="match_parent"
@@ -19,49 +73,21 @@
         android:background="@android:color/transparent"
         android:orientation="vertical">
 
-        <FrameLayout
-            android:id="@+id/camera_action_bar"
-            android:layout_width="fill_parent"
-            android:layout_height="45dp"
-            android:background="#17151A" >
-
-            <ImageView 
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:src="@drawable/title_bar"
-                android:scaleType="fitXY" />
-
-            <ImageView
-                android:id="@+id/camera_close_img"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:padding="10dp"
-                android:layout_gravity="left|center_vertical"
-                android:src="@drawable/close_button"
-                android:background="@drawable/top_bar_btn_selector" />
-
-            <TextView
-                android:id="@+id/camera_recording_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:textColor="#D73546" />
-
-            <ImageView
-                android:id="@+id/camera_project_play"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:padding="10dp"
-                android:layout_gravity="right|center_vertical"
-                android:src="@drawable/project_play"
-                android:background="@drawable/top_bar_btn_selector" />
-        </FrameLayout>
-
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginTop="0dp"
+        android:background="#333"
+        android:padding="10dp"
+        android:progress="0"
+        android:progressDrawable="@drawable/greenprogress" />
+        
         <FrameLayout
             android:id="@+id/camera_preview_overlay"
             android:layout_width="match_parent"
-            android:layout_height="0dp">
+            android:layout_height="12dp">
         </FrameLayout>
 
         <View
@@ -70,6 +96,15 @@
             android:layout_weight="1"
             android:layout_gravity="bottom"
             android:background="#17151A" />
+
+        <Button
+            android:id="@+id/camera_play_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="#333"
+            android:text="播放" />
+
     </LinearLayout>
 
 </FrameLayout>
