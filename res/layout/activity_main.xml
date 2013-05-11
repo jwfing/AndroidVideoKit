@@ -1,16 +1,75 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/camera_framelayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".MainActivity" >
+    android:layout_height="match_parent" >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+    <FrameLayout
+        android:id="@+id/camera_preview_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center" >
+    </FrameLayout>
 
-</RelativeLayout>
+    <LinearLayout
+        android:id="@+id/camera_portrait_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="top"
+        android:background="@android:color/transparent"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:id="@+id/camera_action_bar"
+            android:layout_width="fill_parent"
+            android:layout_height="45dp"
+            android:background="#17151A" >
+
+            <ImageView 
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:src="@drawable/title_bar"
+                android:scaleType="fitXY" />
+
+            <ImageView
+                android:id="@+id/camera_close_img"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:padding="10dp"
+                android:layout_gravity="left|center_vertical"
+                android:src="@drawable/close_button"
+                android:background="@drawable/top_bar_btn_selector" />
+
+            <TextView
+                android:id="@+id/camera_recording_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="#D73546" />
+
+            <ImageView
+                android:id="@+id/camera_project_play"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:padding="10dp"
+                android:layout_gravity="right|center_vertical"
+                android:src="@drawable/project_play"
+                android:background="@drawable/top_bar_btn_selector" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/camera_preview_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
+        </FrameLayout>
+
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_gravity="bottom"
+            android:background="#17151A" />
+    </LinearLayout>
+
+</FrameLayout>
