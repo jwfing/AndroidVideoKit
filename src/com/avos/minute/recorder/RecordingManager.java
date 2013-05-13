@@ -11,14 +11,13 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.SurfaceTexture;
+//import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
 import android.media.CamcorderProfile;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
 import android.media.ThumbnailUtils;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.StatFs;
@@ -29,7 +28,7 @@ import android.view.Gravity;
 import android.view.OrientationEventListener;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.TextureView;
+//import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -44,30 +43,29 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
     private static final int FOCUS_MIN_VALUE = -1000;
     private static final long MINIMUM_RECORDING_TIME = 2000;
     private static final int MAXIMUM_RECORDING_TIME = 60 * 1000;
-    private static final long CLIP_GRAPH_UPDATE_INTERVAL = 25;
     private static final long LOW_STORAGE_THRESHOLD = 5 * 1024 * 1024;
     private static final long RECORDING_FILE_LIMIT = 100 * 1024 * 1024;
 
-    private boolean mPaused = true;
+    private boolean paused = true;
 
-    private MediaRecorder mMediaRecorder = null;
-    private boolean mRecording = false;
+    private MediaRecorder mediaRecorder = null;
+    private boolean recording = false;
 
-    private FrameLayout mPreviewFrame = null;
+    private FrameLayout previewFrame = null;
 
     private boolean mPreviewing = false;
 
-    private TextureView mTextureView = null;
-    private SurfaceTexture mSurfaceTexture = null;
-    private boolean mSurfaceTextureReady = false;
+//    private TextureView mTextureView = null;
+//    private SurfaceTexture mSurfaceTexture = null;
+//    private boolean mSurfaceTextureReady = false;
+//
+    private SurfaceView surfaceView = null;
+    private SurfaceHolder surfaceHolder = null;
+    private boolean surfaceViewReady = false;
 
-    private SurfaceView mSurfaceView = null;
-    private SurfaceHolder mHolder = null;
-    private boolean mSurfaceViewReady = false;
-
-    private Camera mCamera = null;
-    private Camera.Parameters mParameters = null;
-    private CamcorderProfile mCamcorderProfile = null;
+    private Camera camera = null;
+    private Camera.Parameters cameraParameters = null;
+    private CamcorderProfile camcorderProfile = null;
 
     private int mOrientation = -1;
     private OrientationEventListener mOrientationEventListener = null;
@@ -78,14 +76,14 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
     private long mStorageSpace;
 
     private Handler mHandler = new Handler();
-    private Runnable mUpdateRecordingTimeTask = new Runnable() {
-        @Override
-        public void run() {
-            long recordingTime = System.currentTimeMillis() - mStartRecordingTime;
-            Log.d(TAG, String.format("Recording time:%d", recordingTime));
-            mHandler.postDelayed(this, CLIP_GRAPH_UPDATE_INTERVAL);
-        }
-    };
+//    private Runnable mUpdateRecordingTimeTask = new Runnable() {
+//        @Override
+//        public void run() {
+//            long recordingTime = System.currentTimeMillis() - mStartRecordingTime;
+//            Log.d(TAG, String.format("Recording time:%d", recordingTime));
+//            mHandler.postDelayed(this, CLIP_GRAPH_UPDATE_INTERVAL);
+//        }
+//    };
     private Runnable mStopRecordingTask = new Runnable() {
         @Override
         public void run() {
@@ -107,9 +105,15 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
 
     private RecordingManager(Activity activity, FrameLayout previewFrame) {
         currentActivity = activity;
-        mPreviewFrame = previewFrame;
+        this.previewFrame = previewFrame;
     }
 
+    public int getVideoWidth() {
+        return this.mVideoWidth;
+    }
+    public int getVideoHeight() {
+        return this.mVideoHeight;
+    }
     public void setDestinationFilepath(String filepath) {
         this.destinationFilepath = filepath;
     }
@@ -132,46 +136,46 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
         }
 
         openCamera();
-        if (mCamera == null) {
+        if (camera == null) {
             showCameraErrorAndFinish();
             return;
         }
 
-        if (useTexture()) {
-            initTextureView();
-        } else {
+//        if (useTexture()) {
+//            initTextureView();
+//        } else {
             initSurfaceView();
-        }
+//        }
 
         // start preview
-        if (useTexture()) {
-            mTextureView.setVisibility(View.VISIBLE);
-        } else {
-            mSurfaceView.setVisibility(View.VISIBLE);
-        }
+//        if (useTexture()) {
+//            mTextureView.setVisibility(View.VISIBLE);
+//        } else {
+            surfaceView.setVisibility(View.VISIBLE);
+//        }
     }
 
     public void onResume() {
         Log.v(TAG, "onResume.");
-        mPaused = false;
+        paused = false;
 
         // Open the camera
-        if (mCamera == null) {
+        if (camera == null) {
             openCamera();
-            if (mCamera == null) {
+            if (camera == null) {
                 showCameraErrorAndFinish();
                 return;
             }
         }
 
         // Initialize the surface texture or surface view
-        if (useTexture() && mTextureView == null) {
-            initTextureView();
-            mTextureView.setVisibility(View.VISIBLE);
-        } else if (!useTexture() && mSurfaceView == null) {
+//        if (useTexture() && mTextureView == null) {
+//            initTextureView();
+//            mTextureView.setVisibility(View.VISIBLE);
+//        } else if (!useTexture() && mSurfaceView == null) {
             initSurfaceView();
-            mSurfaceView.setVisibility(View.VISIBLE);
-        }
+            surfaceView.setVisibility(View.VISIBLE);
+//        }
 
         // Start the preview
         if (!mPreviewing) {
@@ -182,73 +186,75 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
     private void openCamera() {
         Log.v(TAG, "openCamera");
         try {
-            mCamera = Camera.open();
-            mCamera.setErrorCallback(this);
-            mCamera.setDisplayOrientation(90); // Since we only support portrait mode
-            mParameters = mCamera.getParameters();
+            camera = Camera.open();
+            camera.setErrorCallback(this);
+            camera.setDisplayOrientation(90); // Since we only support portrait mode
+            cameraParameters = camera.getParameters();
         } catch (RuntimeException e) {
             e.printStackTrace();
-            mCamera = null;
+            camera = null;
         }
     }
 
     private void closeCamera() {
         Log.v(TAG, "closeCamera");
-        if (mCamera == null) {
+        if (camera == null) {
             Log.d(TAG, "Already stopped.");
             return;
         }
 
-        mCamera.setErrorCallback(null);
+        camera.setErrorCallback(null);
         if (mPreviewing) {
             stopPreview();
         }
-        mCamera.release();
-        mCamera = null;
+        camera.release();
+        camera = null;
     }
 
-    private void initTextureView() {
-        mTextureView = new TextureView(currentActivity);
-        mTextureView.setSurfaceTextureListener(new SurfaceTextureCallback());
-        mTextureView.setVisibility(View.GONE);
-        FrameLayout.LayoutParams params = new LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, Gravity.CENTER);
-        mTextureView.setLayoutParams(params);
-        mPreviewFrame.addView(mTextureView);
-    }
-
-    private void releaseSurfaceTexture() {
-        if (mSurfaceTexture != null) {
-            mPreviewFrame.removeAllViews();
-            mTextureView = null;
-            mSurfaceTexture = null;
-            mSurfaceTextureReady = false;
-        }
-    }
-
+//    private void initTextureView() {
+//        mTextureView = new TextureView(currentActivity);
+//        mTextureView.setSurfaceTextureListener(new SurfaceTextureCallback());
+//        mTextureView.setVisibility(View.GONE);
+//        FrameLayout.LayoutParams params = new LayoutParams(
+//                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, Gravity.CENTER);
+//        mTextureView.setLayoutParams(params);
+//        Log.d(TAG, "add texture view to preview frame");
+//        mPreviewFrame.addView(mTextureView);
+//    }
+//
+//    private void releaseSurfaceTexture() {
+//        if (mSurfaceTexture != null) {
+//            mPreviewFrame.removeAllViews();
+//            mTextureView = null;
+//            mSurfaceTexture = null;
+//            mSurfaceTextureReady = false;
+//        }
+//    }
+//
     private void initSurfaceView() {
-        mSurfaceView = new SurfaceView(currentActivity);
-        mSurfaceView.getHolder().addCallback(new SurfaceViewCallback());
-        mSurfaceView.setVisibility(View.GONE);
+        surfaceView = new SurfaceView(currentActivity);
+        surfaceView.getHolder().addCallback(new SurfaceViewCallback());
+        surfaceView.setVisibility(View.GONE);
         FrameLayout.LayoutParams params = new LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, Gravity.CENTER);
-        mSurfaceView.setLayoutParams(params);
-        mPreviewFrame.addView(mSurfaceView);
+        surfaceView.setLayoutParams(params);
+        Log.d(TAG, "add surface view to preview frame");
+        previewFrame.addView(surfaceView);
     }
 
     private void releaseSurfaceView() {
-        if (mSurfaceView != null) {
-            mPreviewFrame.removeAllViews();
-            mSurfaceView = null;
-            mHolder = null;
-            mSurfaceViewReady = false;
+        if (surfaceView != null) {
+            previewFrame.removeAllViews();
+            surfaceView = null;
+            surfaceHolder = null;
+            surfaceViewReady = false;
         }
     }
 
     private void startPreview() {
-        if ((useTexture() && !mSurfaceTextureReady) || (!useTexture() && !mSurfaceViewReady)) {
-            return;
-        }
+//        if ((useTexture() && !mSurfaceTextureReady) || (!useTexture() && !mSurfaceViewReady)) {
+//            return;
+//        }
 
         Log.v(TAG, "startPreview.");
         if (mPreviewing) {
@@ -259,12 +265,12 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
         resizePreview();
 
         try {
-            if (useTexture()) {
-                mCamera.setPreviewTexture(mSurfaceTexture);
-            } else {
-                mCamera.setPreviewDisplay(mHolder);
-            }
-            mCamera.startPreview();
+//            if (useTexture()) {
+//                mCamera.setPreviewTexture(mSurfaceTexture);
+//            } else {
+                camera.setPreviewDisplay(surfaceHolder);
+//            }
+            camera.startPreview();
             mPreviewing = true;
         } catch (Exception e) {
             closeCamera();
@@ -276,58 +282,58 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
 
     private void stopPreview() {
         Log.v(TAG, "stopPreview");
-        if (mCamera != null) {
-            mCamera.stopPreview();
+        if (camera != null) {
+            camera.stopPreview();
             mPreviewing = false;
         }
     }
 
     public void onPause() {
-        mPaused = true;
+        paused = true;
 
-        if (mRecording) {
+        if (recording) {
             stopRecording();
         }
         closeCamera();
 
-        if (useTexture()) {
-            releaseSurfaceTexture();
-        } else {
+//        if (useTexture()) {
+//            releaseSurfaceTexture();
+//        } else {
             releaseSurfaceView();
-        }
+//        }
     }
 
     private void setCameraParameters() {
         if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_720P)) {
-            mCamcorderProfile = CamcorderProfile.get(CamcorderProfile.QUALITY_720P);
+            camcorderProfile = CamcorderProfile.get(CamcorderProfile.QUALITY_720P);
         } else if (CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_480P)) {
-            mCamcorderProfile = CamcorderProfile.get(CamcorderProfile.QUALITY_480P);
+            camcorderProfile = CamcorderProfile.get(CamcorderProfile.QUALITY_480P);
         } else {
-            mCamcorderProfile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+            camcorderProfile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
         }
-        mVideoWidth = mCamcorderProfile.videoFrameWidth;
-        mVideoHeight = mCamcorderProfile.videoFrameHeight;
-        mCamcorderProfile.fileFormat = MediaRecorder.OutputFormat.MPEG_4;
-        mCamcorderProfile.videoFrameRate = 25;
+        mVideoWidth = camcorderProfile.videoFrameWidth;
+        mVideoHeight = camcorderProfile.videoFrameHeight;
+        camcorderProfile.fileFormat = MediaRecorder.OutputFormat.MPEG_4;
+        camcorderProfile.videoFrameRate = 25;
 
         Log.v(TAG, "mVideoWidth=" + mVideoWidth + " mVideoHeight=" + mVideoHeight);
-        mParameters.setPreviewSize(mVideoWidth, mVideoHeight);
+        cameraParameters.setPreviewSize(mVideoWidth, mVideoHeight);
 
-        if (mParameters.getSupportedWhiteBalance().contains(Camera.Parameters.WHITE_BALANCE_AUTO)) {
-            mParameters.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_AUTO);
+        if (cameraParameters.getSupportedWhiteBalance().contains(Camera.Parameters.WHITE_BALANCE_AUTO)) {
+            cameraParameters.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_AUTO);
         }
 
-        if (mParameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
-            mParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+        if (cameraParameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+            cameraParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
         }
 
-        mParameters.setRecordingHint(true);
-        mParameters.set("cam_mode", 1);
+        cameraParameters.setRecordingHint(true);
+        cameraParameters.set("cam_mode", 1);
 
-        mCamera.setParameters(mParameters);
-        mParameters = mCamera.getParameters();
+        camera.setParameters(cameraParameters);
+        cameraParameters = camera.getParameters();
 
-        mCamera.setDisplayOrientation(90);
+        camera.setDisplayOrientation(90);
         android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
         Log.d(TAG, info.orientation + " degree");
     }
@@ -337,10 +343,10 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
         Point optimizedSize = getOptimizedPreviewSize(mVideoWidth, mVideoHeight);
         Log.d(TAG, String.format("Optimized size:%d|%d", optimizedSize.x, optimizedSize.y));
 
-        ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) mPreviewFrame.getLayoutParams();
+        ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) previewFrame.getLayoutParams();
         params.width = optimizedSize.x;
         params.height = optimizedSize.y;
-        mPreviewFrame.setLayoutParams(params);
+        previewFrame.setLayoutParams(params);
     }
 
     public void setOrientation(int ori) {
@@ -352,14 +358,14 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
     }
 
     public Camera getCamera() {
-        return mCamera;
+        return camera;
     }
 
     @SuppressWarnings("serial")
     public void setFocusArea(float x, float y) {
-        if (mCamera != null) {
-            int viewWidth = mSurfaceView.getWidth();
-            int viewHeight = mSurfaceView.getHeight();
+        if (camera != null) {
+            int viewWidth = surfaceView.getWidth();
+            int viewHeight = surfaceView.getHeight();
 
             int focusCenterX = FOCUS_MAX_VALUE - (int) (x / viewWidth * (FOCUS_MAX_VALUE - FOCUS_MIN_VALUE));
             int focusCenterY = FOCUS_MIN_VALUE + (int) (y / viewHeight * (FOCUS_MAX_VALUE - FOCUS_MIN_VALUE));
@@ -368,14 +374,14 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
             final int right = focusCenterY + FOCUS_AREA_RADIUS > FOCUS_MAX_VALUE ? FOCUS_MAX_VALUE : focusCenterY + FOCUS_AREA_RADIUS;
             final int bottom = focusCenterX + FOCUS_AREA_RADIUS > FOCUS_MAX_VALUE ? FOCUS_MAX_VALUE : focusCenterX + FOCUS_AREA_RADIUS;
 
-            Camera.Parameters params = mCamera.getParameters();
+            Camera.Parameters params = camera.getParameters();
             params.setFocusAreas(new ArrayList<Camera.Area>() {
                 {
                     add(new Camera.Area(new Rect(left, top, right, bottom), 1000));
                 }
             });
-            mCamera.setParameters(params);
-            mCamera.autoFocus(new AutoFocusCallback() {
+            camera.setParameters(params);
+            camera.autoFocus(new AutoFocusCallback() {
                 @Override
                 public void onAutoFocus(boolean success, Camera camera) {
                     Log.d(TAG, "onAutoFocus");
@@ -384,9 +390,10 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
         }
     }
 
-    public void startRecording() {
-        if (!mRecording) {
+    public void startRecording(String destinationFilepath) {
+        if (!recording) {
             updateStorageSpace();
+            setDestinationFilepath(destinationFilepath);
             if (mStorageSpace <= LOW_STORAGE_THRESHOLD) {
                 Log.v(TAG, "Storage issue, ignore the start request");
                 Toast.makeText(currentActivity, "Storage issue, ignore the recording request", Toast.LENGTH_LONG).show();
@@ -400,7 +407,7 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
 
             Log.d(TAG, "Successfully prepare media recorder.");
             try {
-                mMediaRecorder.start();
+                mediaRecorder.start();
             } catch (RuntimeException e) {
                 Log.e(TAG, "MediaRecorder start failed.");
                 releaseMediaRecorder();
@@ -413,16 +420,13 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
                 mOrientationEventListener.disable();
             }
 
-//            mClipGraph.setVisibility(View.VISIBLE);
-//            mHandler.post(mUpdateRecordingTimeTask);
-            mRecording = true;
-
+            recording = true;
         }
     }
 
     public void stopRecording() {
-        if (mRecording) {
-            if (!mPaused) {
+        if (recording) {
+            if (!paused) {
                 // Capture at least 1 second video
                 long currentTime = System.currentTimeMillis();
                 if (currentTime - mStartRecordingTime < MINIMUM_RECORDING_TIME) {
@@ -438,9 +442,9 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
 //            mHandler.removeCallbacks(mUpdateRecordingTimeTask);
 
             try {
-                mMediaRecorder.setOnErrorListener(null);
-                mMediaRecorder.setOnInfoListener(null);
-                mMediaRecorder.stop(); // stop the recording
+                mediaRecorder.setOnErrorListener(null);
+                mediaRecorder.setOnInfoListener(null);
+                mediaRecorder.stop(); // stop the recording
                 Toast.makeText(currentActivity, "Video file saved.", Toast.LENGTH_LONG).show();
 
                 long stopRecordingTime = System.currentTimeMillis();
@@ -477,10 +481,10 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
 //                mActiveClip = null;
 
                 releaseMediaRecorder(); // release the MediaRecorder object
-                if (!mPaused) {
-                    mParameters = mCamera.getParameters();
+                if (!paused) {
+                    cameraParameters = camera.getParameters();
                 }
-                mRecording = false;
+                recording = false;
             }
 
         }
@@ -490,39 +494,39 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
         // For back camera only
         if (orientation != -1) {
             Log.d(TAG, "set orientationHint:" + (orientation + 135) % 360 / 90 * 90);
-            mMediaRecorder.setOrientationHint((orientation + 135) % 360 / 90 * 90);
+            mediaRecorder.setOrientationHint((orientation + 135) % 360 / 90 * 90);
         }else {
             Log.d(TAG, "not set orientationHint to mediaRecorder");
         }
     }
 
     private boolean prepareMediaRecorder() {
-        mMediaRecorder = new MediaRecorder();
+        mediaRecorder = new MediaRecorder();
 
-        mCamera.unlock();
-        mMediaRecorder.setCamera(mCamera);
+        camera.unlock();
+        mediaRecorder.setCamera(camera);
 
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
-        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 
-        mMediaRecorder.setProfile(mCamcorderProfile);
+        mediaRecorder.setProfile(camcorderProfile);
 
-        mMediaRecorder.setMaxDuration(MAXIMUM_RECORDING_TIME);
-        mMediaRecorder.setOutputFile(this.destinationFilepath);
+        mediaRecorder.setMaxDuration(MAXIMUM_RECORDING_TIME);
+        mediaRecorder.setOutputFile(this.destinationFilepath);
 
         try {
-            mMediaRecorder.setMaxFileSize(Math.min(RECORDING_FILE_LIMIT, mStorageSpace - LOW_STORAGE_THRESHOLD));
+            mediaRecorder.setMaxFileSize(Math.min(RECORDING_FILE_LIMIT, mStorageSpace - LOW_STORAGE_THRESHOLD));
         } catch (RuntimeException exception) {
         }
 
         setRecorderOrientation(mOrientation);
 
         if (!useTexture()) {
-            mMediaRecorder.setPreviewDisplay(mHolder.getSurface());
+            mediaRecorder.setPreviewDisplay(surfaceHolder.getSurface());
         }
 
         try {
-            mMediaRecorder.prepare();
+            mediaRecorder.prepare();
         } catch (IllegalStateException e) {
             releaseMediaRecorder();
             return false;
@@ -531,19 +535,19 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
             return false;
         }
 
-        mMediaRecorder.setOnErrorListener(this);
-        mMediaRecorder.setOnInfoListener(this);
+        mediaRecorder.setOnErrorListener(this);
+        mediaRecorder.setOnInfoListener(this);
 
         return true;
 
     }
 
     private void releaseMediaRecorder() {
-        if (mMediaRecorder != null) {
-            mMediaRecorder.reset(); // clear recorder configuration
-            mMediaRecorder.release(); // release the recorder object
-            mMediaRecorder = null;
-            mCamera.lock(); // lock camera for later use
+        if (mediaRecorder != null) {
+            mediaRecorder.reset(); // clear recorder configuration
+            mediaRecorder.release(); // release the recorder object
+            mediaRecorder = null;
+            camera.lock(); // lock camera for later use
         }
     }
 
@@ -618,8 +622,8 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
     }
 
     private boolean useTexture() {
-//        return false;
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1;
+        return false;
+//        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1;
     }
 
     private class SurfaceViewCallback implements SurfaceHolder.Callback {
@@ -632,44 +636,44 @@ public class RecordingManager implements Camera.ErrorCallback, MediaRecorder.OnE
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
             Log.v(TAG, "surfaceCreated");
-            mSurfaceViewReady = true;
-            mHolder = holder;
+            surfaceViewReady = true;
+            surfaceHolder = holder;
             startPreview();
         }
 
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
             Log.d(TAG, "surfaceDestroyed");
-            mSurfaceViewReady = false;
+            surfaceViewReady = false;
         }
 
     }
 
-    private class SurfaceTextureCallback implements TextureView.SurfaceTextureListener {
-        @Override
-        public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-            Log.v(TAG, "onSurfaceTextureAvailable");
-            mSurfaceTextureReady = true;
-            mSurfaceTexture = surface;
-            startPreview();
-        }
-
-        @Override
-        public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-            mSurfaceTextureReady = false;
-            return false;
-        }
-
-        @Override
-        public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-        }
-
-        @Override
-        public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-        }
-
-    }
-
+//    private class SurfaceTextureCallback implements TextureView.SurfaceTextureListener {
+//        @Override
+//        public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+//            Log.v(TAG, "onSurfaceTextureAvailable");
+//            mSurfaceTextureReady = true;
+//            mSurfaceTexture = surface;
+//            startPreview();
+//        }
+//
+//        @Override
+//        public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+//            mSurfaceTextureReady = false;
+//            return false;
+//        }
+//
+//        @Override
+//        public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+//        }
+//
+//        @Override
+//        public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+//        }
+//
+//    }
+//
     @Override
     public void onError(int error, Camera camera) {
         Log.e(TAG, "Camera onError. what=" + error + ".");

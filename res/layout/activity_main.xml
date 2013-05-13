@@ -10,60 +10,12 @@
         android:layout_height="match_parent"
         android:layout_gravity="center" >
     </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/video_view"
+    <VideoView android:id="@+id/video_preview_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:background="#333"
-        android:visibility="gone" >
-            <VideoView android:id="@+id/video_play_view"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:layout_gravity="center">
-            </VideoView>
-        <LinearLayout
-            android:id="@+id/video_portrait_overlay"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="top"
-            android:background="@android:color/transparent"
-            android:orientation="vertical">
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="@android:style/Widget.ProgressBar.Horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_marginTop="0dp"
-        android:background="#333"
-        android:padding="10dp"
-        android:progress="100"
-        android:progressDrawable="@drawable/greenprogress" />
-            
-            <FrameLayout
-                android:id="@+id/video_preview_overlay"
-                android:layout_width="match_parent"
-                android:layout_height="12dp">
-            </FrameLayout>
-
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:layout_gravity="bottom"
-                android:background="#17151A" />
-
-            <Button
-                android:id="@+id/video_share_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:background="#333"
-                android:text="Crop" />
-        </LinearLayout>
-    </FrameLayout>
+        android:layout_marginLeft="0dp" >
+    </VideoView>
     
     <LinearLayout
         android:id="@+id/camera_portrait_overlay"
@@ -73,38 +25,36 @@
         android:background="@android:color/transparent"
         android:orientation="vertical">
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="@android:style/Widget.ProgressBar.Horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_marginTop="0dp"
-        android:background="#333"
-        android:padding="10dp"
-        android:progress="0"
-        android:progressDrawable="@drawable/greenprogress" />
-        
-        <FrameLayout
-            android:id="@+id/camera_preview_overlay"
-            android:layout_width="match_parent"
-            android:layout_height="12dp">
-        </FrameLayout>
+	    <ProgressBar
+	        android:id="@+id/progressBar"
+	        style="@android:style/Widget.ProgressBar.Horizontal"
+	        android:layout_width="match_parent"
+	        android:layout_height="30dp"
+	        android:layout_marginTop="0dp"
+	        android:background="#17151A"
+	        android:padding="10dp"
+	        android:progress="0"
+	        android:progressDrawable="@drawable/greenprogress" />
 
-        <View
-            android:layout_width="wrap_content"
+       <FrameLayout
+            android:id="@+id/video_preview_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="12dp" >
+       </FrameLayout>
+
+       <View android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:layout_gravity="bottom"
             android:background="#17151A" />
 
-        <Button
-            android:id="@+id/camera_play_button"
+       <Button
+            android:id="@+id/next_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:background="#333"
-            android:text="播放" />
-
+            android:text="Preview" />
     </LinearLayout>
 
 </FrameLayout>
