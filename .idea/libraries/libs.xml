@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="libs">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/gson-1.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/httpmime-4.2.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/android-support-v4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/android-async-http-1.4.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/commons-codec-20041127.091804.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/isoparser-1.0-RC-23.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/stickylistheaders_lib.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/aspectjrt-1.7.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

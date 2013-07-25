@@ -2,5 +2,7 @@
 <resources>
 
     <string name="app_name">VideoKitSample</string>
+    <string name="setting">settting</string>
+    <string name="action_bar_search">search</string>
 
 </resources>

@@ -21,11 +21,11 @@ JNIEXPORT jint JNICALL JNI_Onload(JavaVM *jvm, void* reserved)
  * Signature: (Ljava/lang/String;Ljava/lang/String;II)I
  */
 JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_crop
-  (JNIEnv *env, jobject obj, jstring inputFile, jstring outputFile, jint width, jint height)
+  (JNIEnv *env, jobject obj, jstring inputFile, jstring outputFile, jint width, jint height, jint cropPos)
 {
     jbyte *input = (*env)->GetStringUTFChars(env, inputFile, NULL);
     jbyte *output = (*env)->GetStringUTFChars(env, outputFile, NULL);
-    LOGD("crop() called. in=%s, out=%s, w=%d h=%d", input, output, width, height);
+    LOGD("crop() called. in=%s, out=%s, w=%d h=%d cp=%d", input, output, width, height, cropPos);
     int i = 0;
     int result = -1;
     int argc = 10;
@@ -55,8 +55,11 @@ JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_crop
                 snprintf(argv[i], 256, "%s", "-vf");
                 break;
             case 4:
-                //snprintf(argv[i], 256, "crop=%d:%d,transpose=1", 480,480);
-                snprintf(argv[i], 256, "crop=%d:%d,scale=480:480,transpose=1", width, height);
+                if (width > 480) {
+                    snprintf(argv[i], 256, "crop=%d:%d:%d:0,scale=480:480,transpose=1", width, height, cropPos);
+                } else {
+                    snprintf(argv[i], 256, "crop=%d:%d:%d:0,transpose=1", width, height, cropPos);
+                }
                 break;
            case 5:
                 snprintf(argv[i], 256, "%s", "-acodec");

@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="dexedLibs">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/isoparser-1.0-RC-23-7a1c4e7133e251adab1cfff363543722.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/android-async-http-1.4.3-865a3b64f5fddb5b01b45844eabf3ac8.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/httpmime-4.2.1-a21e9742f292e689ffd863f891d95b61.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/gson-1.6-8e3f6728ff964fed66cbeca1f8c8d0a6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/aspectjrt-1.7.2-c3b2390bb8814301b2fe1f62a70f3782.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/commons-codec-20041127.091804-9dab1e89bd947b48975fc07b364b8844.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/stickylistheaders_lib-bd01406908c91165c6101cf9f09dfbce.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/android-support-v4-6f9b3c0d30359e6aa189505e3087b016.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -112,7 +112,7 @@ public class FullscreenShootActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         Log.v(TAG, "onCreate");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_shoot);
         this.cameraPreviewFrame = (FrameLayout) findViewById(R.id.camera_preview_frame);
         this.videoView = (VideoView) findViewById(R.id.video_preview_frame);
         this.videoPreviewOverlay = (FrameLayout) findViewById(R.id.video_preview_overlay);
@@ -154,8 +154,8 @@ public class FullscreenShootActivity extends Activity {
                 if (orientation == ORIENTATION_UNKNOWN) {
                     return;
                 }
-                Log.d(TAG, "set Orientation: " + orientation);
-                mRecManager.setOrientation(orientation);
+//                Log.d(TAG, "set Orientation: " + orientation);
+//                mRecManager.setOrientation(orientation);
                 mOrientation = orientation;
             }
         };

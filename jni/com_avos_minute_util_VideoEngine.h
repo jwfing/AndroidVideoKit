@@ -16,7 +16,7 @@ JNIEXPORT jint JNICALL JNI_Onload(JavaVM *jvm, void* reserved);
  * Signature: (Ljava/lang/String;Ljava/lang/String;II)I
  */
 JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_crop
-  (JNIEnv *, jobject, jstring, jstring, jint, jint);
+  (JNIEnv *, jobject, jstring, jstring, jint, jint, jint);
 
 #ifdef __cplusplus
 }
