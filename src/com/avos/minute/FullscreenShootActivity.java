@@ -172,7 +172,7 @@ public class FullscreenShootActivity extends Activity {
                 } else if (internalStatus.Previewing == status) {
                     Log.d(TAG, "begin to crop video");
                     VideoEngine engine = new VideoEngine();
-                    engine.crop(videoFilepath, Utils.getFinalVideoPath(), 480, 480);
+                    engine.crop(videoFilepath, Utils.getFinalVideoPath(), 480, 480, 80);
                     Log.d(TAG, "end to crop video");
                     Toast.makeText(FullscreenShootActivity.this, "Video process successed.", Toast.LENGTH_LONG).show();
                 }
