@@ -17,6 +17,259 @@ JNIEXPORT jint JNICALL JNI_Onload(JavaVM *jvm, void* reserved)
 
 /*
  * Class:     com_avos_minute_util_VideoEngine
+ * Method:    demux
+ * Signature: (Ljava/lang/String;Ljava/lang/String;II)I
+ */
+JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_demux
+  (JNIEnv *env, jobject obj, jstring inputFile, jstring audioFile, jstring videoFile)
+{
+    jbyte *input = (*env)->GetStringUTFChars(env, inputFile, NULL);
+    jbyte *audioOutput = (*env)->GetStringUTFChars(env, audioFile, NULL);
+    jbyte *videoOutput = (*env)->GetStringUTFChars(env, videoFile, NULL);
+    LOGD("demux() called. in=%s, out-audio=%s, out-video=%s", input, audioOutput, videoOutput);
+    int i = 0;
+    int result = -1;
+    int argc = 7;
+    char** argv = (char**)malloc(sizeof(char*) * argc);
+    if (NULL == argv) {
+        (*env)->ReleaseStringUTFChars(env, inputFile, input);
+        (*env)->ReleaseStringUTFChars(env, audioFile, audioOutput);
+        (*env)->ReleaseStringUTFChars(env, videoFile, videoOutput);
+        return (jint)result;
+    }
+    // ffmpeg -i inputfile -vn outputfile
+    for (i = 0; i < argc; i++) {
+        argv[i] = (char*)malloc(256);
+        if (NULL == argv[i]) {
+            break;
+        }
+        switch (i) {
+            case 0:
+                snprintf(argv[i], 256, "%s", "ffmpegutil");
+                break;
+            case 1:
+                snprintf(argv[i], 256, "%s", "-i");
+                break;
+            case 2:
+                snprintf(argv[i], 256, "%s", input);
+                break;
+            case 3:
+                snprintf(argv[i], 256, "%s", "-an");
+                break;
+            case 4:
+                snprintf(argv[i], 256, "%s", "-vcodec");
+                break;
+            case 5:
+                snprintf(argv[i], 256, "%s", "copy");
+                break;
+            case 6:
+                snprintf(argv[i], 256, "%s", videoOutput);
+                break;
+            default:
+                break;
+        };
+    }
+    if (i == argc) {
+        result = process(argc, argv);
+        for (i = 0; i < argc; i++) {
+            switch (i) {
+                case 0:
+                    snprintf(argv[i], 256, "%s", "ffmpegutil");
+                    break;
+                case 1:
+                    snprintf(argv[i], 256, "%s", "-i");
+                    break;
+                case 2:
+                    snprintf(argv[i], 256, "%s", input);
+                    break;
+                case 3:
+                    snprintf(argv[i], 256, "%s", "-vn");
+                    break;
+                case 4:
+                    snprintf(argv[i], 256, "%s", "-acodec");
+                    break;
+                case 5:
+                    snprintf(argv[i], 256, "%s", "copy");
+                    break;
+                case 6:
+                    snprintf(argv[i], 256, "%s", audioOutput);
+                    break;
+                default:
+                    break;
+            };
+        }
+        process(argc, argv);
+    }
+    (*env)->ReleaseStringUTFChars(env, inputFile, input);
+    (*env)->ReleaseStringUTFChars(env, audioFile, audioOutput);
+    (*env)->ReleaseStringUTFChars(env, videoFile, videoOutput);
+ 
+    for (i = 0; i < argc; i++) {
+        if (NULL != argv[i]) {
+            free(argv[i]);
+            argv[i] = NULL;
+        }
+    };
+    free(argv);
+    argv = NULL;
+    return (jint)result;
+}
+
+/*
+ * Class:     com_avos_minute_util_VideoEngine
+ * Method:    crop
+ * Signature: (Ljava/lang/String;Ljava/lang/String;II)I
+ */
+JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_decodeFrames
+  (JNIEnv *env, jobject obj, jstring inputFile, jstring outputDir, jstring outputFormat)
+{
+    jbyte *input = (*env)->GetStringUTFChars(env, inputFile, NULL);
+    jbyte *output = (*env)->GetStringUTFChars(env, outputDir, NULL);
+    jbyte *format = (*env)->GetStringUTFChars(env, outputFormat, NULL);
+    LOGD("decodeFrames() called. in=%s, out=%s, fmt=%s", input, output, format);
+    int i = 0;
+    int result = -1;
+    int argc = 9;
+    char** argv = (char**)malloc(sizeof(char*) * argc);
+    if (NULL == argv) {
+        (*env)->ReleaseStringUTFChars(env, inputFile, input);
+        (*env)->ReleaseStringUTFChars(env, outputDir, output);
+        (*env)->ReleaseStringUTFChars(env, outputFormat, format);
+        return (jint)result;
+    }
+    // ffmpeg -i inputFile -r 25 -f image2 -y dir/format
+    for (i = 0; i < argc; i++) {
+        argv[i] = (char*)malloc(256);
+        if (NULL == argv[i]) {
+            break;
+        }
+        switch (i) {
+            case 0:
+                snprintf(argv[i], 256, "%s", "ffmpegutil");
+                break;
+            case 1:
+                snprintf(argv[i], 256, "%s", "-i");
+                break;
+            case 2:
+                snprintf(argv[i], 256, "%s", input);
+                break;
+            case 3:
+                snprintf(argv[i], 256, "%s", "-r");
+                break;
+            case 4:
+                snprintf(argv[i], 256, "%s", "25");
+                break;
+           case 5:
+                snprintf(argv[i], 256, "%s", "-f");
+                break;
+           case 6:
+                snprintf(argv[i], 256, "%s", "image2");
+                break;
+           case 7:
+                snprintf(argv[i], 256, "%s", "-y");
+                break;
+           case 8:
+                snprintf(argv[i], 256, "%s/%s", output, format);
+                break;
+           default:
+                break;
+        };
+    }
+    (*env)->ReleaseStringUTFChars(env, inputFile, input);
+    (*env)->ReleaseStringUTFChars(env, outputDir, output);
+    (*env)->ReleaseStringUTFChars(env, outputFormat, format);
+ 
+    if (i == argc) {
+        result = process(argc, argv);
+    }
+    for (i = 0; i < argc; i++) {
+        if (NULL != argv[i]) {
+            free(argv[i]);
+            argv[i] = NULL;
+        }
+    };
+    free(argv);
+    argv = NULL;
+    return (jint)result;
+}
+
+/*
+ * Class:     com_avos_minute_util_VideoEngine
+ * Method:    encodeFrames
+ * Signature: (Ljava/lang/String;Ljava/lang/String;II)I
+ */
+JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_encodeFrames
+  (JNIEnv *env, jobject obj, jstring inputFile, jstring inputFormat, jstring outputFile)
+{
+    jbyte *input = (*env)->GetStringUTFChars(env, inputFile, NULL);
+    jbyte *format = (*env)->GetStringUTFChars(env, inputFormat, NULL);
+    jbyte *output = (*env)->GetStringUTFChars(env, outputFile, NULL);
+    LOGD("encodeFrames() called. in=%s, format=%s, out=%s", input, format, output);
+    int i = 0;
+    int result = -1;
+    int argc = 8;
+    char** argv = (char**)malloc(sizeof(char*) * argc);
+    if (NULL == argv) {
+        (*env)->ReleaseStringUTFChars(env, inputFile, input);
+        (*env)->ReleaseStringUTFChars(env, inputFormat, format);
+        (*env)->ReleaseStringUTFChars(env, outputFile, output);
+        return (jint)result;
+    }
+    // ffmpeg -i inputfile -vf "crop=w:h" -acodec copy outputfile
+    for (i = 0; i < argc; i++) {
+        argv[i] = (char*)malloc(256);
+        if (NULL == argv[i]) {
+            break;
+        }
+        switch (i) {
+            case 0:
+                snprintf(argv[i], 256, "%s", "ffmpegutil");
+                break;
+            case 1:
+                snprintf(argv[i], 256, "%s", "-f");
+                break;
+            case 2:
+                snprintf(argv[i], 256, "%s", "image2");
+                break;
+            case 3:
+                snprintf(argv[i], 256, "%s", "-i");
+                break;
+            case 4:
+                snprintf(argv[i], 256, "%s/%s", input, format);
+                break;
+            case 5:
+                snprintf(argv[i], 256, "%s", "-vcodec");
+                break;
+            case 6:
+                snprintf(argv[i], 256, "%s", "libx264");
+                break;
+            case 7:
+                snprintf(argv[i], 256, "%s", output);
+                break;
+            default:
+                break;
+        };
+    }
+    (*env)->ReleaseStringUTFChars(env, inputFile, input);
+    (*env)->ReleaseStringUTFChars(env, inputFormat, format);
+    (*env)->ReleaseStringUTFChars(env, outputFile, output);
+ 
+    if (i == argc) {
+        result = process(argc, argv);
+    }
+    for (i = 0; i < argc; i++) {
+        if (NULL != argv[i]) {
+            free(argv[i]);
+            argv[i] = NULL;
+        }
+    };
+    free(argv);
+    argv = NULL;
+    return (jint)result;
+}
+
+/*
+ * Class:     com_avos_minute_util_VideoEngine
  * Method:    crop
  * Signature: (Ljava/lang/String;Ljava/lang/String;II)I
  */
@@ -26,6 +279,90 @@ JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_crop
     jbyte *input = (*env)->GetStringUTFChars(env, inputFile, NULL);
     jbyte *output = (*env)->GetStringUTFChars(env, outputFile, NULL);
     LOGD("crop() called. in=%s, out=%s, w=%d h=%d cp=%d", input, output, width, height, cropPos);
+    int i = 0;
+    int result = -1;
+    int argc = 12;
+    char** argv = (char**)malloc(sizeof(char*) * argc);
+    if (NULL == argv) {
+        (*env)->ReleaseStringUTFChars(env, inputFile, input);
+        (*env)->ReleaseStringUTFChars(env, outputFile, output);
+        return (jint)result;
+    }
+    // ffmpeg -i inputfile -vf "crop=w:h" -acodec copy outputfile
+    for (i = 0; i < argc; i++) {
+        argv[i] = (char*)malloc(256);
+        if (NULL == argv[i]) {
+            break;
+        }
+        switch (i) {
+            case 0:
+                snprintf(argv[i], 256, "%s", "ffmpegutil");
+                break;
+            case 1:
+                snprintf(argv[i], 256, "%s", "-i");
+                break;
+            case 2:
+                snprintf(argv[i], 256, "%s", input);
+                break;
+            case 3:
+                snprintf(argv[i], 256, "%s", "-r");
+                break;
+            case 4:
+                snprintf(argv[i], 256, "%s", "25");
+                break;
+            case 5:
+                snprintf(argv[i], 256, "%s", "-vf");
+                break;
+            case 6:
+                snprintf(argv[i], 256, "crop=%d:%d:%d:0,transpose=1", width, height, cropPos);
+                break;
+           case 7:
+                snprintf(argv[i], 256, "%s", "-acodec");
+                break;
+           case 8:
+                snprintf(argv[i], 256, "%s", "copy");
+                break;
+           case 9:
+                snprintf(argv[i], 256, "%s", "-vcodec");
+                break;
+           case 10:
+                snprintf(argv[i], 256, "%s", "libx264");
+                break;
+           case 11:
+                snprintf(argv[i], 256, "%s", output);
+                break;
+           default:
+                break;
+        };
+    }
+    (*env)->ReleaseStringUTFChars(env, inputFile, input);
+    (*env)->ReleaseStringUTFChars(env, outputFile, output);
+ 
+    if (i == argc) {
+        result = process(argc, argv);
+    }
+    for (i = 0; i < argc; i++) {
+        if (NULL != argv[i]) {
+            free(argv[i]);
+            argv[i] = NULL;
+        }
+    };
+    free(argv);
+    argv = NULL;
+    return (jint)result;
+}
+
+/*
+ * Class:     com_avos_minute_util_VideoEngine
+ * Method:    scale
+ * Signature: (Ljava/lang/String;Ljava/lang/String;II)I
+ */
+JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_scale
+  (JNIEnv *env, jobject obj, jstring inputFile, jstring outputFile, jint width, jint height)
+{
+    jbyte *input = (*env)->GetStringUTFChars(env, inputFile, NULL);
+    jbyte *output = (*env)->GetStringUTFChars(env, outputFile, NULL);
+    LOGD("scale() called. in=%s, out=%s, w=%d h=%d", input, output, width, height);
     int i = 0;
     int result = -1;
     int argc = 10;
@@ -55,11 +392,7 @@ JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_crop
                 snprintf(argv[i], 256, "%s", "-vf");
                 break;
             case 4:
-                if (width > 480) {
-                    snprintf(argv[i], 256, "crop=%d:%d:%d:0,scale=480:480,transpose=1", width, height, cropPos);
-                } else {
-                    snprintf(argv[i], 256, "crop=%d:%d:%d:0,transpose=1", width, height, cropPos);
-                }
+                snprintf(argv[i], 256, "scale=%d:%d", width, height);
                 break;
            case 5:
                 snprintf(argv[i], 256, "%s", "-acodec");

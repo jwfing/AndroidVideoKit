@@ -18,6 +18,39 @@ JNIEXPORT jint JNICALL JNI_Onload(JavaVM *jvm, void* reserved);
 JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_crop
   (JNIEnv *, jobject, jstring, jstring, jint, jint, jint);
 
+/*
+ * Class:     com_avos_minute_util_VideoEngine
+ * Method:    crop
+ * Signature: (Ljava/lang/String;Ljava/lang/String;II)I
+ */
+JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_scale
+  (JNIEnv *, jobject, jstring, jstring, jint, jint);
+
+
+/*
+ * Class:     com_avos_minute_util_VideoEngine
+ * Method:    demux
+ * Signature: (Ljava/lang/String;Ljava/lang/String;II)I
+ */
+JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_demux
+  (JNIEnv *, jobject, jstring, jstring, jstring);
+
+/*
+ * Class:     com_avos_minute_util_VideoEngine
+ * Method:    decodeFrames
+ * Signature: (Ljava/lang/String;Ljava/lang/String;II)I
+ */
+JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_decodeFrames
+  (JNIEnv *, jobject, jstring, jstring, jstring);
+
+/*
+ * Class:     com_avos_minute_util_VideoEngine
+ * Method:    encodeFrames
+ * Signature: (Ljava/lang/String;Ljava/lang/String;II)I
+ */
+JNIEXPORT jint JNICALL Java_com_avos_minute_util_VideoEngine_encodeFrames
+  (JNIEnv *, jobject, jstring, jstring, jstring);
+
 #ifdef __cplusplus
 }
 #endif
